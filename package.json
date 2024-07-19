@@ -1,0 +1,47 @@
+{
+  "name": "osu-ahr",
+  "description": "Create OSU multiplayer games with auto host rotate.",
+  "version": "1.0.0",
+  "keywords": [
+    "osu",
+    "osu-ahr",
+    "osu auto host",
+    "osu auto host rotate",
+    "osu multiplayer",
+    "auto host",
+    "auto host rotate",
+    "multiplayer"
+  ],
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "module": "dist/index.mjs",
+  "main": "dist/index.js",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "author": "Kasuga <kasu-ga@outlook.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kasu-ga/osu-ahr.git"
+  },
+  "scripts": {
+    "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
+    "build": "tsup src/index.ts --format cjs,esm --dts --minify terser",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.20",
+    "terser": "^5.25.0",
+    "tsup": "^8.0.1",
+    "typescript": "^5.3.2"
+  },
+  "dependencies": {
+    "bancho.js": "^0.11.6"
+  }
+}
