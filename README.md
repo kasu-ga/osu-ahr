@@ -6,7 +6,7 @@
 
 The other day I had an idea, I wanted to create an osu multiplayer room with the rotating host system, however, I found that it is somewhat complex to carry it out if you do not have minimal knowledge in programming, therefore, many people They do not continue with this idea and give up.
 
-To prevent more people from giving up and really continuing with their idea or simply for those looking for a simpler method, develop this module, it is quite basic, but it fulfills its role and being so minimalist, using it is simple, also, yes still If you want an even simpler method, you can download or clone this other [repository](), which just by modifying a JSON you can start playing.
+To prevent more people from giving up and really continuing with their idea or simply for those looking for a simpler method, develop this module, it is quite basic, but it fulfills its role and being so minimalist, using it is simple, also, yes still If you want an even simpler method, you can download or clone this other [repository](https://github.com/kasu-ga/osu-multiplayer-bot.git), which just by modifying a JSON you can start playing.
 
 As an additional, I chose to develop it in Nodejs because of its low complexity and that anyone with one or two tutorials can make it work.
 
