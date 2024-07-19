@@ -1,4 +1,6 @@
 import { BanchoClient } from "bancho.js";
+import messages from "simple-log-messages";
+
 import { AhrRoom, type AhrRoomConfig } from "./room";
 
 export interface AhrClientConfig {
@@ -29,8 +31,8 @@ export class AhrClient {
         username: client.authentication.username,
         password: client.authentication.password,
         gamemode: client.gamemode,
-        host: client.authentication.host,
-        port: client.authentication.port,
+        host: client.authentication.host ?? "irc.ppy.sh",
+        port: client.authentication.port ?? 6667,
       });
     }
     this.banchoClient = client;
@@ -41,22 +43,27 @@ export class AhrClient {
     }
   }
 
-  async init(callback: (error: Error | null) => void) {
+  async init(callback?: (error: Error | null) => void) {
     try {
+      messages.info("Establishing connection with osu...");
       await this.banchoClient.connect();
+      messages.success("Connection to osu successful.");
       for (const room of this.rooms) {
         await room.init();
       }
-      callback(null);
+      if (callback) callback(null);
     } catch (error) {
-      callback(error as Error);
+      if (callback) return callback(error as Error);
+      throw error;
     }
   }
 
   async close() {
+    messages.warn("Canceling connection and closing rooms...");
     this.banchoClient.disconnect();
     for (const room of this.rooms) {
       await room.close();
     }
+    messages.success("Connection and closed rooms correctly.");
   }
 }

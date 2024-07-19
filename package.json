@@ -1,7 +1,7 @@
 {
   "name": "osu-ahr",
   "description": "Create OSU multiplayer games with auto host rotate.",
-  "version": "1.0.0",
+  "version": "1.0.5",
   "keywords": [
     "osu",
     "osu-ahr",
@@ -16,13 +16,13 @@
   "publishConfig": {
     "access": "public"
   },
-  "module": "dist/index.mjs",
-  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "main": "dist/index.cjs",
   "type": "module",
   "exports": {
     ".": {
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
     }
   },
   "author": "Kasuga <kasu-ga@outlook.com>",
@@ -42,6 +42,8 @@
     "typescript": "^5.3.2"
   },
   "dependencies": {
-    "bancho.js": "^0.11.6"
+    "bancho.js": "^0.11.6",
+    "chalk": "^5.3.0",
+    "simple-log-messages": "^1.0.1"
   }
 }

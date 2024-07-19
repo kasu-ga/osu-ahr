@@ -1,5 +1,8 @@
 import BanchoJs from "bancho.js";
 import type { Beatmap } from "nodesu";
+import messages from "simple-log-messages";
+import chalk from "chalk";
+
 import { formatSeconds, getApprovalStatus } from "./utils";
 
 export interface AhrRoomConfig {
@@ -91,7 +94,17 @@ export class AhrRoom {
       const messageArgs = message.slice(1).split(" ");
       const command = messageArgs[0];
       if (command === "help") {
-        await room.lobby.channel.sendMessage("Commands list:");
+        await this.message("All Commands:");
+        await this.message("!queue - show queue list");
+        await this.message("!skip - skip current host");
+        await this.message("!abort - abort match");
+        await this.message("!diff <mindiff> <maxdiff> - set room dificulty");
+        await this.message("!mindiff <value> - set room min dificulty");
+        await this.message("!maxdiff <value> - set room max dificulty");
+        await this.message("!start <value> - start match cooldown");
+        await this.message(
+          "More details on [https://github.com/kasu-ga/osu-multiplayer-bot Github]"
+        );
         return;
       }
       if (command === "queue" || command === "qu") {
@@ -130,8 +143,10 @@ export class AhrRoom {
       }
     });
 
-    console.info(
-      `Created room https://osu.ppy.sh/mp/${room.lobby.id} [${room.name}]`
+    messages.success(
+      `Created room ${chalk.blue(`https://osu.ppy.sh/mp/${room.lobby.id}`)} [${
+        room.lobby.name
+      }]`
     );
   }
 
@@ -240,6 +255,11 @@ export class AhrRoom {
   }
 
   async join(user: BanchoJs.BanchoUser) {
+    messages.info(
+      `${chalk.magenta(user.username)} has joined the ${chalk.yellow(
+        this.lobby?.name
+      )} room`
+    );
     this.players.push(user);
     if (this.players.length === 1) {
       await this.rotateHost();
@@ -248,6 +268,11 @@ export class AhrRoom {
 
   async leave(user: BanchoJs.BanchoUser) {
     this.players = this.players.filter((player) => player.id !== user.id);
+    messages.info(
+      `${chalk.magenta(user.username)} left the ${chalk.yellow(
+        this.lobby?.name
+      )} room`
+    );
   }
 
   async setMinDiff(user: BanchoJs.BanchoUser, value: string | number) {
@@ -261,6 +286,7 @@ export class AhrRoom {
       return;
     }
     this.minDiff = value;
+    await this.message("Minimum difficulty set.");
   }
 
   async setMaxDiff(user: BanchoJs.BanchoUser, value: string | number) {
@@ -273,7 +299,8 @@ export class AhrRoom {
       );
       return;
     }
-    this.minDiff = value;
+    this.maxDiff = value;
+    await this.message("Maximum difficulty set.");
   }
 
   async startWithTime(startTime: string | number) {
