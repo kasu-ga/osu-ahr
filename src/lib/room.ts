@@ -27,6 +27,12 @@ const defaultVotes: AhrRoomVotes = {
   start: [],
 };
 
+export interface AhrRoomOptions {
+  prefix?: string;
+  onClose?: (room: AhrRoom) => void;
+  enableLogs?: boolean;
+}
+
 export class AhrRoom {
   private config: AhrRoomConfig;
   private client: BanchoJs.BanchoClient;
@@ -36,22 +42,34 @@ export class AhrRoom {
   private minDiff: number = 0;
   private maxDiff: number = 20;
   private beatmap: Beatmap | null = null;
-  private onClose?: (room: AhrRoom) => void;
-  private prefix: string;
+  private options: AhrRoomOptions;
+
+  getLobby() {
+    return this.lobby;
+  }
+
+  details() {
+    return {
+      beatmap: this.beatmap,
+      players: this.players,
+      difficulty: {
+        min: this.minDiff,
+        max: this.maxDiff,
+      },
+    };
+  }
 
   constructor(
-    prefix: string,
     client: BanchoJs.BanchoClient,
     config: AhrRoomConfig,
-    onClose?: (room: AhrRoom) => void
+    options: AhrRoomOptions = {}
   ) {
     this.client = client;
     this.config = config;
-    this.prefix = prefix;
+    this.options = options;
 
     if (config.difficulty?.min) this.minDiff = config.difficulty.min;
     if (config.difficulty?.max) this.maxDiff = config.difficulty.max;
-    this.onClose = onClose;
   }
 
   async init() {
@@ -84,13 +102,14 @@ export class AhrRoom {
     room.lobby.on("playerJoined", async ({ player }) => {
       await this.join(player.user);
     });
-    room.lobby.on("playerLeft", async ({ user }) => {
+    room.lobby.on("playerLeft", async ({ isHost, user }) => {
+      await this.rotateHost();
       await this.leave(user);
     });
 
     room.lobby.channel.on("message", async ({ user, message }) => {
       if (!this.players.find((u) => u.id === user.id)) return;
-      if (!message.startsWith(this.prefix)) return;
+      if (!message.startsWith(this.options.prefix ?? "!")) return;
       const messageArgs = message.slice(1).split(" ");
       const command = messageArgs[0];
       if (command === "help") {
@@ -138,16 +157,17 @@ export class AhrRoom {
       }
       if (command === "close") {
         await this.close(user);
-        if (this.onClose) this.onClose(this);
         return;
       }
     });
 
-    messages.success(
-      `Created room ${chalk.blue(`https://osu.ppy.sh/mp/${room.lobby.id}`)} [${
-        room.lobby.name
-      }]`
-    );
+    if (this.options.enableLogs) {
+      messages.success(
+        `Created room ${chalk.blue(
+          `https://osu.ppy.sh/mp/${room.lobby.id}`
+        )} [${room.lobby.name}]`
+      );
+    }
   }
 
   async getDefaultBeatmap(): Promise<Beatmap> {
@@ -201,7 +221,7 @@ export class AhrRoom {
     }
     await this.message("Closing room...");
     await this.lobby?.closeLobby();
-    if (this.onClose) this.onClose(this);
+    if (this.options.onClose) this.options.onClose(this);
   }
 
   async getHost(): Promise<BanchoJs.BanchoUser | null> {
@@ -255,11 +275,13 @@ export class AhrRoom {
   }
 
   async join(user: BanchoJs.BanchoUser) {
-    messages.info(
-      `${chalk.magenta(user.username)} has joined the ${chalk.yellow(
-        this.lobby?.name
-      )} room`
-    );
+    if (this.options.enableLogs) {
+      messages.info(
+        `${chalk.magenta(user.username)} has joined the ${chalk.yellow(
+          this.lobby?.name
+        )} room`
+      );
+    }
     this.players.push(user);
     if (this.players.length === 1) {
       await this.rotateHost();
@@ -268,11 +290,13 @@ export class AhrRoom {
 
   async leave(user: BanchoJs.BanchoUser) {
     this.players = this.players.filter((player) => player.id !== user.id);
-    messages.info(
-      `${chalk.magenta(user.username)} left the ${chalk.yellow(
-        this.lobby?.name
-      )} room`
-    );
+    if (this.options.enableLogs) {
+      messages.info(
+        `${chalk.magenta(user.username)} left the ${chalk.yellow(
+          this.lobby?.name
+        )} room`
+      );
+    }
   }
 
   async setMinDiff(user: BanchoJs.BanchoUser, value: string | number) {

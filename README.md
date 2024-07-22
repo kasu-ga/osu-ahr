@@ -29,7 +29,7 @@ const config: AhrClientOptions = {};
 
 const rooms: AhrRoomConfig[] = [];
 
-const client = new AhrClient(config, rooms);
+const client = new AhrClient(config, { rooms });
 
 await client.init();
 ```

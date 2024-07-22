@@ -16,14 +16,19 @@ export interface AhrClientConfig {
   gamemode?: 0 | 1 | 2 | 3;
 }
 
+export interface AhrClientOptions {
+  commandPrefix?: string;
+  rooms: AhrRoomConfig[];
+  enableLogs?: boolean;
+}
+
 export class AhrClient {
   readonly banchoClient: BanchoClient;
   readonly rooms: AhrRoom[] = [];
 
   constructor(
     client: BanchoClient | AhrClientConfig,
-    rooms: AhrRoomConfig[] = [],
-    prefix: string = "!"
+    options: AhrClientOptions
   ) {
     if (!(client instanceof BanchoClient)) {
       client = new BanchoClient({
@@ -37,8 +42,11 @@ export class AhrClient {
     }
     this.banchoClient = client;
 
-    for (const roomConfig of rooms ?? []) {
-      const room = new AhrRoom(prefix, client, roomConfig);
+    for (const roomConfig of options.rooms ?? []) {
+      const room = new AhrRoom(client, roomConfig, {
+        prefix: options.commandPrefix,
+        enableLogs: options.enableLogs,
+      });
       this.rooms.push(room);
     }
   }
